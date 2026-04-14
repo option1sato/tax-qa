@@ -410,7 +410,7 @@
   // ★ 設定（変更が必要な箇所）
   // ============================================================
   const SERVER_BASE_URL = "https://taxqa-server.onrender.com";
-  const LIFF_ID = "2009801243-saQAQRGN";
+  const LIFF_ID = "YOUR_LIFF_ID"; // ★ LIFFアプリ作成後にここを変更
 
   // ============================================================
   // STATE
@@ -431,9 +431,18 @@
       await liff.init({ liffId: LIFF_ID });
 
       if (!liff.isLoggedIn()) {
-        liff.login();
+        // ループ防止：すでにログイン試行済みならスキップ
+        if (!sessionStorage.getItem('liff_login_attempted')) {
+          sessionStorage.setItem('liff_login_attempted', '1');
+          liff.login({ redirectUri: window.location.href });
+        } else {
+          throw new Error('LINEログインに失敗しました');
+        }
         return;
       }
+
+      // ログイン成功時はフラグをクリア
+      sessionStorage.removeItem('liff_login_attempted');
 
       const profile = await liff.getProfile();
       lineUserId = profile.userId;
